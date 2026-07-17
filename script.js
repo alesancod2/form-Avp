@@ -176,9 +176,53 @@ function submitForm() {
         formData[field.id] = input.value.trim();
     });
 
-    console.log('Dados cadastrados:', formData);
+    // Map field IDs to spreadsheet column names
+    const spreadsheetData = {
+        'Nome Completo': formData.nomeCompleto,
+        'CPF': formData.cpf,
+        'Banco': formData.banco,
+        'Nº do Banco': formData.numeroBanco,
+        'Agência': formData.agencia,
+        'Dígito da Agência': formData.digitoAgencia,
+        'Conta': formData.conta,
+        'Dígito da Conta': formData.digitoConta,
+        'Tipo de Conta': formData.tipoConta,
+        'Chave Pix': formData.chavePix,
+        'Tipo de Chave Pix': formData.tipoChavePix,
+        'Titular da Conta': formData.titularConta,
+        'CPF do Titular (se diferente)': formData.cpfTitular,
+        'Observações': formData.observacoes
+    };
 
-    // Show success
+    // Disable submit button and show loading
+    const submitBtn = document.querySelector('.btn-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando...';
+
+    // Send data to Google Sheets via Apps Script
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCEOhfSdkRnlZkTw_bgIcT-kmBkkdsUt-B1jr22muhMkCuhrkbGmaMxKHc8u8xvKR8/exec';
+
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(spreadsheetData)
+    })
+    .then(() => {
+        // Show success (no-cors doesn't return readable response, so we assume success)
+        showSuccess();
+    })
+    .catch(error => {
+        console.error('Erro ao enviar dados:', error);
+        alert('Ocorreu um erro ao enviar os dados. Tente novamente.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Concluir Cadastro';
+    });
+}
+
+function showSuccess() {
     document.querySelectorAll('.form-step').forEach(el => {
         el.classList.remove('active');
     });
@@ -190,6 +234,11 @@ function submitForm() {
         el.classList.remove('active');
         el.classList.add('completed');
     });
+
+    // Reset submit button
+    const submitBtn = document.querySelector('.btn-submit');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Concluir Cadastro';
 }
 
 // Reset form for new entry
