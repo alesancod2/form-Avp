@@ -176,22 +176,22 @@ function submitForm() {
         formData[field.id] = input.value.trim();
     });
 
-    // Map field IDs to spreadsheet column names
+    // Map field IDs to spreadsheet column names (using simple keys for reliable form encoding)
     const spreadsheetData = {
-        'Nome Completo': formData.nomeCompleto,
-        'CPF': formData.cpf,
-        'Banco': formData.banco,
-        'Nº do Banco': formData.numeroBanco,
-        'Agência': formData.agencia,
-        'Dígito da Agência': formData.digitoAgencia,
-        'Conta': formData.conta,
-        'Dígito da Conta': formData.digitoConta,
-        'Tipo de Conta': formData.tipoConta,
-        'Chave Pix': formData.chavePix,
-        'Tipo de Chave Pix': formData.tipoChavePix,
-        'Titular da Conta': formData.titularConta,
-        'CPF do Titular (se diferente)': formData.cpfTitular,
-        'Observações': formData.observacoes
+        'nomeCompleto': formData.nomeCompleto,
+        'cpf': formData.cpf,
+        'banco': formData.banco,
+        'numeroBanco': formData.numeroBanco,
+        'agencia': formData.agencia,
+        'digitoAgencia': formData.digitoAgencia,
+        'conta': formData.conta,
+        'digitoConta': formData.digitoConta,
+        'tipoConta': formData.tipoConta,
+        'chavePix': formData.chavePix,
+        'tipoChavePix': formData.tipoChavePix,
+        'titularConta': formData.titularConta,
+        'cpfTitular': formData.cpfTitular,
+        'observacoes': formData.observacoes
     };
 
     // Disable submit button and show loading
