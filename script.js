@@ -199,27 +199,38 @@ function submitForm() {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando...';
 
-    // Send data to Google Sheets via Apps Script
+    // Send data to Google Sheets via Apps Script using form submission
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCEOhfSdkRnlZkTw_bgIcT-kmBkkdsUt-B1jr22muhMkCuhrkbGmaMxKHc8u8xvKR8/exec';
 
-    fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(spreadsheetData)
-    })
-    .then(() => {
-        // Show success (no-cors doesn't return readable response, so we assume success)
+    // Create a hidden form and submit via iframe (most reliable for Google Apps Script)
+    const iframe = document.createElement('iframe');
+    iframe.name = 'hidden-iframe';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = GOOGLE_SCRIPT_URL;
+    form.target = 'hidden-iframe';
+
+    // Add all fields to the form
+    for (const [key, value] of Object.entries(spreadsheetData)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value || '';
+        form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+
+    // Clean up and show success after a brief delay
+    setTimeout(() => {
+        document.body.removeChild(form);
+        document.body.removeChild(iframe);
         showSuccess();
-    })
-    .catch(error => {
-        console.error('Erro ao enviar dados:', error);
-        alert('Ocorreu um erro ao enviar os dados. Tente novamente.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Concluir Cadastro';
-    });
+    }, 1500);
 }
 
 function showSuccess() {
