@@ -147,6 +147,10 @@ function showStep(step) {
 
     currentStep = step;
 
+    // Limpa eventual mensagem de erro de envio ao navegar entre etapas
+    const errorEl = document.getElementById('submit-error');
+    if (errorEl) errorEl.textContent = '';
+
     // Scroll to top of container
     document.querySelector('.container').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -212,14 +216,43 @@ function submitForm() {
         method: 'POST',
         body: params
     })
-    .then(response => {
+    .then(response => response.json())
+    .then(data => {
+        // Back-end bloqueia duplicados pelo CPF e retorna result: 'duplicate'
+        if (data && data.result === 'duplicate') {
+            showDuplicateError(data.message || 'Já existe um cadastro com este CPF.');
+            return;
+        }
+        if (data && data.result === 'error') {
+            showDuplicateError('Ocorreu um erro ao enviar. Tente novamente.');
+            return;
+        }
         showSuccess();
     })
     .catch(error => {
-        // Even if fetch fails due to CORS redirect, data is usually received by Google
-        console.log('Envio processado:', error);
+        // Se não for possível ler o JSON (ex.: redirect/CORS), o dado normalmente
+        // é recebido pelo Google. O bloqueio de duplicados segue garantido no back-end.
+        console.log('Envio processado (resposta não legível):', error);
         showSuccess();
     });
+}
+
+// Exibe erro de duplicidade (ou falha) na etapa de revisão
+function showDuplicateError(message) {
+    const submitBtn = document.querySelector('.btn-submit');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Concluir Cadastro';
+
+    const actions = submitBtn.closest('.form-actions');
+    let errorEl = document.getElementById('submit-error');
+    if (!errorEl) {
+        errorEl = document.createElement('div');
+        errorEl.id = 'submit-error';
+        errorEl.className = 'submit-error';
+        actions.parentElement.insertBefore(errorEl, actions);
+    }
+    errorEl.textContent = message;
+    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function showSuccess() {
